@@ -1,13 +1,13 @@
 import pandas as pd
 import os
+import requests
+from constants import *
+from ffl_requests import ESPNFFLRequest, Season
 
 
-sheet = pd.read_csv(
-    os.path.abspath(
-        os.path.join(__file__, "../..", "data/sheet.csv")
-    )
-)
+year_2020 = ESPNFFLRequest(2020, LEAGUE_ID)
+season = Season(year_2020.members_request, year_2020.matchups_request)
 
-sheet.sort_values(by="Average", ascending=False, inplace=True)
+
 
 print("debug")
