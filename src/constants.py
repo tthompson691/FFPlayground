@@ -1,5 +1,6 @@
 FANTASY_BASE_ENDPOINT = "https://fantasy.espn.com/apis/v3/games/ffl/leagueHistory/"
 LEAGUE_ID = 331354
+
 LEAGUE_MEMBERS = {
     "mgmcqu1882373": "Gray",
     "navyfootball619": "Travis",
@@ -10,5 +11,11 @@ LEAGUE_MEMBERS = {
     "keepdigginwatson": "Zac",
     "cal.wheeless@gmail.com": "Cal",
     "schenk3536110": "Schenkey",
-    "jackthweatt": "Jack"
+    "jackthweatt": "Jack",
+    "Acompton101": "A Comp",
+    "wilcannotspell": "Wil G",
+    "mustang22292": "Johnny",
+    "Lahafreak": "Devin",
+    "Nude Tayne": "Bruce Wayne?",
+    "conko bob 43": "Collin"
 }
