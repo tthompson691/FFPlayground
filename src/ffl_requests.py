@@ -136,6 +136,7 @@ class Season:
             )
 
         results = pd.DataFrame(teams)
+        results.set_index("team", drop=True, inplace=True)
         results.sort_values(by="wins", ascending=False, inplace=True)
         return results
 
@@ -195,6 +196,7 @@ class Season:
     def determine_luck_measures(self):
         self.determine_luck_measure_1()
         self.determine_luck_measure_2()
+        self.determine_luck_measure_3()
 
     def determine_luck_measure_1(self):
         # difference between points for rank and win% rank
@@ -214,5 +216,53 @@ class Season:
 
     def determine_luck_measure_3(self):
         # number of top-3 losses or bottom-3 wins
-        pass
+        # final value for each person is (lucky wins - unlucky losses)
+        unlucky_losses = []
+        lucky_wins = []
+        for week in self.all_matchups["week"].unique():
+            if self.playoff_threshold is not None and week < self.playoff_threshold:
+                week_df = self.rearrange_week_df(self.all_matchups[self.all_matchups["week"] == week], week)
+                week_unlucky_losses, week_lucky_wins = self.determine_unlucky_losses_lucky_wins(week_df)
 
+                if week_unlucky_losses.shape[0] != 0:
+                    unlucky_losses.append(week_unlucky_losses)
+
+                if week_lucky_wins.shape[0] != 0:
+                    lucky_wins.append(week_lucky_wins)
+
+        unlucky_losses_df = pd.concat(unlucky_losses)
+        lucky_wins_df = pd.concat(lucky_wins)
+
+        unlucky_losses_count = unlucky_losses_df.value_counts("team")
+        unlucky_losses_count.rename("UL", inplace=True)
+        lucky_wins_count = lucky_wins_df.value_counts("team")
+        lucky_wins_count.rename("LW", inplace=True)
+
+        self.join_counts_to_cumulative_data(unlucky_losses_count, lucky_wins_count)
+
+        print("debug")
+
+    def join_counts_to_cumulative_data(self, losses, wins):
+        self.cumulative_results = pd.concat([self.cumulative_results, losses, wins], axis=1)
+        self.cumulative_results.fillna(0, inplace=True)
+        self.cumulative_results["luck measure 3"] = self.cumulative_results["LW"] - self.cumulative_results["UL"]
+        print("debug")
+
+    @staticmethod
+    def rearrange_week_df(df, week):
+        week_df = pd.DataFrame(columns=["week", "team", "score", "win"])
+        week_df["team"] = pd.concat([df["team 1"], df["team 2"]])
+        week_df["score"] = pd.concat([df["team 1 score"], df["team 2 score"]])
+        winners = list(df["winner"].values)
+        week_df["win"] = [True if row["team"] in winners else False for i, row in week_df.iterrows()]
+        week_df["week"] = week
+        week_df.sort_values(by="score", ascending=False, inplace=True)
+        week_df.reset_index(drop=True, inplace=True)
+        return week_df
+
+    @staticmethod
+    def determine_unlucky_losses_lucky_wins(week_df):
+        unlucky_losses = week_df.head(3)[week_df["win"] == False]
+        lucky_wins = week_df.tail(3)[week_df["win"] == True]
+
+        return unlucky_losses, lucky_wins
