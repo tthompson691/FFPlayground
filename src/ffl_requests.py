@@ -12,18 +12,24 @@ class ESPNFFLRequest:
         self.endpoint = f"{FANTASY_BASE_ENDPOINT}{str(league_id)}"
         self.year = year
         self.league_id = league_id
-        self.members_request = self.get_members_request()
-        self.matchups_request = self.get_matchups_request()
-        self.boxscore_request = self.get_boxscore_request()
-        self.player_scores_request = self.get_player_scores_request()
-        self.roster_request = self.get_roster_request()
-        self.schedule_request = self.get_schedule_request()
-        self.draft_request = self.get_draft_request()
+        # self.members_request = self.get_members_request()
+        # self.matchups_request = self.get_matchups_request()
+        # self.boxscore_request = self.get_boxscore_request()
+        # self.player_scores_request = self.get_player_scores_request()
+        # self.roster_request = self.get_roster_request()
+        # self.schedule_request = self.get_schedule_request()
+        # self.draft_request = self.get_draft_request()
 
     def get_members_request(self):
         params = {"seasonId": self.year}
+        headers = {
+            "User-Agent": "PostmanRuntime/7.33.0",
+            "Accept": "*/*",
+            "Accept-Encoding": ["gzip", "deflate", "br"],
+            "Connection": "keep-alive"
+        }
 
-        return requests.get(self.endpoint, params=params, verify=False).json()[0]
+        return requests.get(self.endpoint, params=params, headers=headers, cookies=cookies,verify=False).json()[0]
 
     def get_matchups_request(self):
         params = {
