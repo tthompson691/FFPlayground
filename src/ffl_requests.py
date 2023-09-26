@@ -2,6 +2,9 @@ from constants import *
 import requests
 import pandas as pd
 import numpy as np
+import os
+
+data_path = os.path.abspath(os.path.join(__file__, "..", "..", "data"))
 
 class ESPNFFLRequest:
     def __init__(self, year, league_id):
@@ -11,6 +14,11 @@ class ESPNFFLRequest:
         self.league_id = league_id
         self.members_request = self.get_members_request()
         self.matchups_request = self.get_matchups_request()
+        self.boxscore_request = self.get_boxscore_request()
+        self.player_scores_request = self.get_player_scores_request()
+        self.roster_request = self.get_roster_request()
+        self.schedule_request = self.get_schedule_request()
+        self.draft_request = self.get_draft_request()
 
     def get_members_request(self):
         params = {"seasonId": self.year}
@@ -20,7 +28,46 @@ class ESPNFFLRequest:
     def get_matchups_request(self):
         params = {
             "seasonId": self.year,
-            "view": "mMatchup"
+            "view": ["mMatchup", "mMatchupScore"]
+        }
+
+        return requests.get(self.endpoint, params=params, verify=False).json()[0]
+
+    def get_boxscore_request(self):
+        params = {
+            "seasonId": self.year,
+            "view": "mBoxscore"
+        }
+
+        return requests.get(self.endpoint, params=params, verify=False).json()[0]
+
+    def get_player_scores_request(self):
+
+        all_weeks = {i: requests.get(self.endpoint, params={"scoringPeriodId": i, "view": ["mMatchup", "mMatchupScore"]}, verify=False).json()[0]
+                     for i in range(1, 17)}
+
+        return all_weeks
+
+    def get_roster_request(self):
+        params = {
+            "seasonId": self.year,
+            "view": "mRoster"
+        }
+
+        return requests.get(self.endpoint, params=params, verify=False).json()[0]
+
+    def get_schedule_request(self):
+        params = {
+            "seasonId": self.year,
+            "view": "mSchedule"
+        }
+
+        return requests.get(self.endpoint, params=params, verify=False).json()[0]
+
+    def get_draft_request(self):
+        params = {
+            "seasonId": self.year,
+            "view": "mDraftDetail"
         }
 
         return requests.get(self.endpoint, params=params, verify=False).json()[0]
@@ -28,6 +75,7 @@ class ESPNFFLRequest:
 
 class Season:
     def __init__(self, members_r, matchups_r):
+        self.matchups_r = matchups_r
         self.playoff_threshold = None
         self.league_members = self.get_members(members_r)
         self.all_matchups = self.get_matchups(matchups_r)
@@ -108,6 +156,7 @@ class Season:
             )
 
         matchups_df = pd.DataFrame(matchups)
+        matchups_df["margin"] = abs(matchups_df["team 1 score"] - matchups_df["team 2 score"])
 
         return matchups_df
 
@@ -141,9 +190,13 @@ class Season:
         return results
 
     def determine_winner(self):
-        final_week_df = self.all_matchups[self.all_matchups["week"] == self.all_matchups["week"].max()]
-        final_week_df.reset_index(drop=True, inplace=True)
-        return final_week_df.loc[0, "winner"]
+        schedule = self.matchups_r["schedule"]
+        final_week = schedule[-1]["matchupPeriodId"]
+        cship_results = [i for i in schedule
+                        if i["matchupPeriodId"] == final_week
+                        and i["playoffTierType"] == "WINNERS_BRACKET"][0]
+        winning_team_id = cship_results[cship_results["winner"].lower()]["teamId"]
+        return self.league_members.loc[winning_team_id, "member_name"]
 
     def determine_record(self, team, team_df: pd.DataFrame):
         wins = losses = 0
@@ -215,7 +268,7 @@ class Season:
             self.cumulative_results["avg points against"]
 
     def determine_luck_measure_3(self):
-        # number of top-3 losses or bottom-3 wins
+        # number of top-3 losses and bottom-3 wins
         # final value for each person is (lucky wins - unlucky losses)
         unlucky_losses = []
         lucky_wins = []
@@ -266,3 +319,54 @@ class Season:
         lucky_wins = week_df.tail(3)[week_df["win"] == True]
 
         return unlucky_losses, lucky_wins
+
+
+class Draft:
+    def __init__(self):
+        self.draft_summary = None
+        # self.player_df = self.get_player_df()
+
+    def get_draft_summary(self, r, members: pd.DataFrame):
+        members.reset_index(drop=False, inplace=True)
+        members.drop(labels="owner_id", axis=1, inplace=True)
+        players = pd.read_csv(os.path.join(data_path, "player_ids.csv"))
+        draft_raw = r["draftDetail"]["picks"]
+        all_picks = [
+            {
+                "round": pick["roundId"],
+                "round pick": pick["roundPickNumber"],
+                "overall pick": pick["id"],
+                "player_id": pick["playerId"],
+                "short_id": pick["teamId"]
+            }
+            for pick in draft_raw
+        ]
+
+        draft_summary = pd.DataFrame(all_picks)
+        res = pd.merge(left=draft_summary, right=members, on="short_id", how="left")
+
+        self.draft_summary = pd.merge(left=res, right=players, on="player_id", how="left")
+
+
+    @staticmethod
+    def get_player_df(r):
+        all_players = []
+        for team in r["teams"]:
+            for player in team["roster"]["entries"]:
+                player_name = player["playerPoolEntry"]["player"]["fullName"]
+                player_id = player["playerPoolEntry"]["player"]["id"]
+                all_players.append({
+                    "player_name": player_name,
+                    "player_id": player_id
+                })
+
+        if "player_ids.csv" in os.listdir(data_path):
+            existing_df = pd.read_csv(os.path.join(data_path, "player_ids.csv"))
+            new_df = pd.concat([pd.DataFrame(all_players), existing_df], ignore_index=True).\
+                drop_duplicates().\
+                reset_index(drop=True)
+            new_df.to_csv(os.path.join(data_path, "player_ids.csv"), index=False)
+        else:
+            new_df = pd.DataFrame(all_players)
+            new_df.to_csv(os.path.join(data_path, "player_ids.csv"), index=False)
+
