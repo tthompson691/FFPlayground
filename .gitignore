@@ -1,2 +1,5 @@
 venv/
 secrets.py
+espn_cookies.py
+__pycache__/
+.vscode/
