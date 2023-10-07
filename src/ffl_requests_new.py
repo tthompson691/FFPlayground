@@ -22,8 +22,20 @@ def get_player_meta(year):
     dfs = []
     for thing in r["teams"]:
         dfs.append(pd.json_normalize(thing["roster"]["entries"]))
-        
-    return pd.concat(dfs).rename(
+
+    positions = pd.Series(
+        {
+            2: "RB",
+            3: "WR",
+            1: "QB",
+            4: "TE",
+            5: "K",
+            16: "D/ST"
+        },
+        name="PositionID"
+    )
+
+    res = pd.concat(dfs).rename(
         {
             "playerPoolEntry.player.firstName": "FirstName",
             "playerPoolEntry.player.lastName": "LastName",
@@ -36,6 +48,10 @@ def get_player_meta(year):
     ).assign(
         Year=year
     )[["Year", "PlayerID", "PositionID", "ProTeamID", "FirstName", "LastName", "FullName"]]
+
+    return res.join(positions, on="PositionID", lsuffix="l", rsuffix="r").rename(
+        {"PositionIDl": "PositionID", "PositionIDr": "Position"}, axis=1
+    )
     
     
 def get_player_scores(year):
@@ -129,6 +145,24 @@ def get_matchups(year):
     return matchups_df
 
 
+def get_final_ranks(year):
+    url = get_base_endpoint(year)
+    params = {"view": "mScoreboard"}
+    r = requests.get(url, params=params, cookies=cookies, verify=False)
+    r.raise_for_status()
+    r = r.json()
+    return pd.json_normalize(r, record_path="teams").rename(
+        {
+            "id": "TeamID",
+            "rankCalculatedFinal": "FinalRank",
+            "record.overall.losses": "Losses",
+            "record.overall.wins": "Wins",
+            "record.overall.ties": "Ties"
+        },
+        axis=1
+    ).drop(["abbrev", "divisionId", "location", "logo", "name", "nickname"], axis=1)
+
+
 def get_members():
     members_dfs = []
     for year in range(2015, 2023):
@@ -155,12 +189,43 @@ def get_members():
             right=teams_df.assign(MemberID=teams_df["MemberID"].astype(str)),
             on="MemberID"
         )
+
+        league_res_df = get_final_ranks(year)
+
+        members_df = pd.merge(left=members_df, right=league_res_df, on="TeamID")
+
         members_dfs.append(members_df)
 
     res = pd.concat(members_dfs)
 
     return res.assign(FullTeamName=res["location"] + " " + res["nickname"]).drop(["location", "nickname", "owners"], axis=1)
 
+def get_draft(year):
+    url = get_base_endpoint(year)
+    params = {"view": "mDraftDetail"}
+    r = requests.get(url, params=params, cookies=cookies, verify=False)
+    r.raise_for_status()
+    r = r.json()
+    df =  pd.DataFrame(r["draftDetail"]["picks"])
+    return df.rename(
+        {
+            "autoDraftTypeId": "AutoDraftTypeID",
+            "bidAmount": "BidAmount",
+            "keeper": "IsKeeper",
+            "lineupSlotId": "LineupSlotID",
+            "memberId": "MemberID",
+            "nominatingTeamId": "NominatingTeamID",
+            "overallPickNumber": "OverallPickNumber",
+            "playerId": "PlayerID",
+            "reservedForKeeper": "IsReservedForKeeper",
+            "roundId": "Round",
+            "roundPickNumber": "RoundPickNumber",
+            "teamId": "TeamID",
+            "tradeLocked": "IsTradeLocked"
+        }, axis=1
+    ).drop("id", axis=1).assign(Year=year)
+
 if __name__ == "__main__":
-    df = get_members()
+    year = 2022
+    df = get_player_meta(2022)
     df

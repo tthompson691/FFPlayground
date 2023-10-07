@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import sqlite3
 import os
-from ffl_requests_new import get_player_meta, get_player_scores, get_matchups, get_members
+from ffl_requests_new import get_player_meta, get_player_scores, get_matchups, get_members, get_draft
 
 
 def insert_as_new_table(df, table_name):
@@ -28,6 +28,8 @@ def populate_matchups(year):
 def populate_league_members():
     insert_as_new_table(df=get_members(), table_name="leaguemembers")
 
+def populate_draft_info(year):
+    insert_as_new_table(df=get_draft(year), table_name="drafts")
 
 if __name__ == "__main__":
-    populate_league_members()
+    populate_player_meta(2022)
