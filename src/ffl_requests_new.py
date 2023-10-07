@@ -136,17 +136,30 @@ def get_members():
         r = requests.get(url, cookies=cookies, verify=False)
         r = get_r_json(r, year)
         members_df = pd.json_normalize(r, record_path="members")
+        teams_df = pd.json_normalize(r, record_path="teams").rename({"id": "TeamID"}, axis=1)
+        teams_df["MemberID"] = teams_df["owners"].apply(lambda x: x[0])
+        teams_df["Year"] = year
         # members_df["RealName"] = members_df["displayName"].apply(lambda x: LEAGUE_MEMBERS[x])
-        members_dfs.append(members_df.set_index("displayName").merge(
+        members_df = (members_df.set_index("displayName").merge(
             right=pd.Series(LEAGUE_MEMBERS, name="RealName"),
             left_index=True,
             right_index=True).reset_index().rename(
-                {"index": "DisplayName", "id": "MemberID"}, axis=1).drop(
-                    "isLeagueManager", axis=1
-                )
+            {"index": "DisplayName", "id": "MemberID"}, axis=1).drop(
+            "isLeagueManager", axis=1
         )
-    
-    return pd.concat(members_dfs).drop_duplicates()
+        )
+        members_df["MemberID"] = members_df["MemberID"].astype(str)
+        # members_df = members_df.join(other=teams_df.assign(MemberID=teams_df["MemberID"].astype(str)), on="MemberID")
+        members_df = pd.merge(
+            left=members_df.assign(MemberID=members_df["MemberID"].astype(str)),
+            right=teams_df.assign(MemberID=teams_df["MemberID"].astype(str)),
+            on="MemberID"
+        )
+        members_dfs.append(members_df)
+
+    res = pd.concat(members_dfs)
+
+    return res.assign(FullTeamName=res["location"] + " " + res["nickname"]).drop(["location", "nickname", "owners"], axis=1)
 
 if __name__ == "__main__":
     df = get_members()

@@ -5,8 +5,6 @@ import os
 from ffl_requests_new import get_player_meta, get_player_scores, get_matchups, get_members
 
 
-
-
 def insert_as_new_table(df, table_name):
     con = sqlite3.connect("FFLPlayground.db")
     df.to_sql(name=table_name, con=con, index=False)
@@ -21,7 +19,7 @@ def populate_player_projections(year):
 
 
 def populate_proteams():
-    df = pd.read_csv(os.path.join(__file__, "..", "..", "data", "proteams.csv"))
+    df = pd.read_csv(os.path.abspath(os.path.join(__file__, "..", "..", "data", "proteams.csv")))
     insert_as_new_table(df=df, table_name="proteams")
     
 def populate_matchups(year):
