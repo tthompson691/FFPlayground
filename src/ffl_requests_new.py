@@ -6,7 +6,7 @@ from espn_cookies import SWID, ESPN_S2_THEBOYS
 cookies = {"swid": SWID, "espn_s2": ESPN_S2_THEBOYS}
 
 def get_r_json(r, year):
-    if year < 2018:
+    if year <= 2018:
         return r.json()[0]
     else:
         return r.json()
@@ -52,8 +52,26 @@ def get_player_meta(year):
     return res.join(positions, on="PositionID", lsuffix="l", rsuffix="r").rename(
         {"PositionIDl": "PositionID", "PositionIDr": "Position"}, axis=1
     )
-    
-    
+
+def parse_player_stats(player_stats, year, week):
+    act_score = proj_score = None
+    if year <= 2018:
+        player_stats = player_stats[0]
+        if player_stats['scoringPeriodId'] != week:
+            return None, None
+        print("D")
+
+    else:
+    # projected/actual points
+        for stat in player_stats:
+            if stat['scoringPeriodId'] != week:
+                continue
+            if stat['statSourceId'] == 0:
+                act_score = round(stat['appliedTotal'], 2)
+            elif stat['statSourceId'] == 1:
+                proj_score = round(stat['appliedTotal'], 2)
+
+    return act_score, proj_score
 def get_player_scores(year):
     url = get_base_endpoint(year)
     slotcodes = {
@@ -83,19 +101,17 @@ def get_player_scores(year):
                 except:
                     res["InjuryStatus"] = None
 
-                
-                # projected/actual points
-                for stat in p['playerPoolEntry']['player']['stats']:
-                    if stat['scoringPeriodId'] != week:
-                        continue
-                    if stat['statSourceId'] == 0:
-                        res["ActualScore"] = round(stat['appliedTotal'], 2)
-                    elif stat['statSourceId'] == 1:
-                        res["ProjectedScore"] = round(stat['appliedTotal'], 2)
+                act_score, proj_score = parse_player_stats(p["playerPoolEntry"]["player"]["stats"], year, week)
+                #
+                if act_score:
+                    res["ActualScore"] = act_score
+
+                if proj_score:
+                    res["ProjectedScore"] = proj_score
                         
                 all_res.append(res)
                 
-    return pd.DataFrame(data=all_res).assign(Year=2022)
+    return pd.DataFrame(data=all_res).assign(Year=year)
 
 def get_matchups(year):
     url = get_base_endpoint(year)
@@ -200,13 +216,20 @@ def get_members():
 
     return res.assign(FullTeamName=res["location"] + " " + res["nickname"]).drop(["location", "nickname", "owners"], axis=1)
 
+
+def fix_owning_team_id(df):
+    df["TeamID"] = df["owningTeamIds"].apply(lambda x: x[0]).astype(int)
+
+    return df.drop("owningTeamIds", axis=1)
+
 def get_draft(year):
     url = get_base_endpoint(year)
     params = {"view": "mDraftDetail"}
     r = requests.get(url, params=params, cookies=cookies, verify=False)
-    r.raise_for_status()
-    r = r.json()
-    df =  pd.DataFrame(r["draftDetail"]["picks"])
+    r = get_r_json(r, year)
+    df = pd.DataFrame(r["draftDetail"]["picks"])
+    if year <= 2018:
+        df = df.drop("owningTeamIds", axis=1)
     return df.rename(
         {
             "autoDraftTypeId": "AutoDraftTypeID",
@@ -227,5 +250,5 @@ def get_draft(year):
 
 if __name__ == "__main__":
     year = 2022
-    df = get_player_meta(2022)
+    df = get_player_scores(2015)
     df
