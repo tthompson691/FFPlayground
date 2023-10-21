@@ -7,7 +7,7 @@ from loguru import logger
 
 
 def insert_as_new_table(df, table_name):
-    con = sqlite3.connect("FFLPlayground.db")
+    con = sqlite3.connect("../FFLPlayground.db")
     df.to_sql(name=table_name, con=con, index=False, if_exists="append")
     con.close()
     
@@ -20,7 +20,7 @@ def populate_player_projections(year):
 
 
 def populate_proteams():
-    df = pd.read_csv(os.path.abspath(os.path.join(__file__, "..", "..", "data", "proteams.csv")))
+    df = pd.read_csv(os.path.abspath(os.path.join(__file__, "../..", "..", "data", "proteams.csv")))
     insert_as_new_table(df=df, table_name="proteams")
     
 def populate_matchups(year):
