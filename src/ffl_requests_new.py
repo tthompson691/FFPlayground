@@ -53,13 +53,13 @@ def get_player_meta(year):
         {"PositionIDl": "PositionID", "PositionIDr": "Position"}, axis=1
     )
 
+
 def parse_player_stats(player_stats, year, week):
     act_score = proj_score = None
     if year <= 2018:
         player_stats = player_stats[0]
         if player_stats['scoringPeriodId'] != week:
             return None, None
-        print("D")
 
     else:
     # projected/actual points
@@ -72,6 +72,8 @@ def parse_player_stats(player_stats, year, week):
                 proj_score = round(stat['appliedTotal'], 2)
 
     return act_score, proj_score
+
+
 def get_player_scores(year):
     url = get_base_endpoint(year)
     slotcodes = {
@@ -112,6 +114,7 @@ def get_player_scores(year):
                 all_res.append(res)
                 
     return pd.DataFrame(data=all_res).assign(Year=year)
+
 
 def get_matchups(year):
     url = get_base_endpoint(year)
@@ -222,6 +225,7 @@ def fix_owning_team_id(df):
 
     return df.drop("owningTeamIds", axis=1)
 
+
 def get_draft(year):
     url = get_base_endpoint(year)
     params = {"view": "mDraftDetail"}
@@ -249,6 +253,6 @@ def get_draft(year):
     ).drop("id", axis=1).assign(Year=year)
 
 if __name__ == "__main__":
-    year = 2022
-    df = get_player_scores(2015)
-    df
+    year = 2018
+    bigres = get_player_scores(year)
+    bigres

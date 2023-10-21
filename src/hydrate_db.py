@@ -3,6 +3,7 @@ import pandas as pd
 import sqlite3
 import os
 from ffl_requests_new import get_player_meta, get_player_scores, get_matchups, get_members, get_draft
+from loguru import logger
 
 
 def insert_as_new_table(df, table_name):
@@ -34,8 +35,25 @@ def populate_draft_info(year):
 if __name__ == "__main__":
     populate_proteams()
     populate_league_members()
-    for year in range(2015, 2023):
-        populate_matchups(year)
-        populate_draft_info(year)
-        populate_player_meta(year)
-        populate_player_projections(year)
+    for year in range(2018, 2023):
+        try:
+            populate_matchups(year)
+        except Exception as e:
+            logger.warning(e)
+
+        try:
+            populate_draft_info(year)
+        except Exception as e:
+            logger.warning(e)
+
+        try:
+            populate_player_meta(year)
+        except Exception as e:
+            logger.warning(e)
+
+        # TODO: figure out scores in < 2019
+        if year >= 2019:
+            try:
+                populate_player_projections(year)
+            except Exception as e:
+                logger.warning(e)
