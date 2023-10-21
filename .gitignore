@@ -1,5 +1,5 @@
 venv/
-secrets.py
+league_secrets.py
 espn_cookies.py
 __pycache__/
 .vscode/

@@ -1,4 +1,4 @@
-from secrets import LEAGUE_ID
+from league_secrets import LEAGUE_ID
 
 FANTASY_BASE_ENDPOINT_NEW = "https://fantasy.espn.com/apis/v3/games/ffl/leagueHistory/"
 

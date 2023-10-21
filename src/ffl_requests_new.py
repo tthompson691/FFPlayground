@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 from constants import get_base_endpoint
-from secrets import SWID, ESPN_S2_THEBOYS, LEAGUE_MEMBERS
+from league_secrets import SWID, ESPN_S2_THEBOYS, LEAGUE_MEMBERS
 
 cookies = {"swid": SWID, "espn_s2": ESPN_S2_THEBOYS}
 
