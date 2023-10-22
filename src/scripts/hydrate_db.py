@@ -7,9 +7,12 @@ from loguru import logger
 
 
 def insert_as_new_table(df, table_name):
-    con = sqlite3.connect("../FFLPlayground.db")
+    logger.info(f"Inserting to {table_name}...")
+    db_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "FFLPlayground.db"))
+    con = sqlite3.connect(db_path)
     df.to_sql(name=table_name, con=con, index=False, if_exists="append")
     con.close()
+    logger.info("Done")
     
     
 def populate_player_meta(year):

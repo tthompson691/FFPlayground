@@ -158,7 +158,7 @@ def get_matchups(year):
                 }
             )
 
-    matchups_df = pd.DataFrame(matchups).assign(Year=2022)
+    matchups_df = pd.DataFrame(matchups).assign(Year=year)
     matchups_df["Margin"] = abs(matchups_df["HomeTeamScore"] - matchups_df["AwayTeamScore"])
 
     return matchups_df
@@ -254,5 +254,5 @@ def get_draft(year):
 
 if __name__ == "__main__":
     year = 2018
-    bigres = get_player_scores(year)
+    bigres = get_members()
     bigres
