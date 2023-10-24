@@ -4,3 +4,5 @@ espn_cookies.py
 __pycache__/
 .vscode/
 FFLPlayground.db
+__pycache__
+FFLPLayground.egg-info
