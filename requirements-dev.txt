@@ -20,6 +20,7 @@ click==8.1.7
 colorama==0.4.6
     # via
     #   click
+    #   loguru
     #   pytest
 coverage[toml]==7.3.2
     # via pytest-cov
@@ -37,6 +38,8 @@ idna==3.4
     # via requests
 iniconfig==2.0.0
     # via pytest
+loguru==0.7.2
+    # via FFLPlayground (pyproject.toml)
 mypy-extensions==1.0.0
     # via black
 nodeenv==1.8.0
@@ -92,6 +95,8 @@ urllib3==2.0.7
     # via requests
 virtualenv==20.24.6
     # via pre-commit
+win32-setctime==1.1.0
+    # via loguru
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

@@ -5,6 +5,7 @@ import numpy as np
 
 SQL_PATH = os.path.abspath(os.path.join(__file__, "..", "sql"))
 
+
 class SQLConn:
     def __init__(self):
         db_path = os.path.abspath(os.path.join(__file__, "..", "..", "FFLPlayground.db"))
@@ -14,6 +15,7 @@ class SQLConn:
 
     def close_connection(self):
         self.conn.close()
+
 
 def get_league_leaderboard():
     db = SQLConn()

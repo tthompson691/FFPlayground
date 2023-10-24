@@ -16,6 +16,7 @@ dev = [
   "pytest-cov",
   "black==22.3.0",
   "ruff==0.0.263",
+  "loguru"
 ]
 
 [tool.black]
