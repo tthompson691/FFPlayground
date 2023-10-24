@@ -2,6 +2,8 @@ import sqlalchemy
 import os
 import pandas as pd
 import numpy as np
+import sys
+
 
 SQL_PATH = os.path.abspath(os.path.join(__file__, "..", "sql"))
 
@@ -9,7 +11,11 @@ SQL_PATH = os.path.abspath(os.path.join(__file__, "..", "sql"))
 class SQLConn:
     def __init__(self):
         db_path = os.path.abspath(os.path.join(__file__, "..", "..", "FFLPlayground.db"))
-        conn_str = f"sqlite:////{db_path}"
+        if "win" in sys.platform:
+            conn_str = f"sqlite:///{db_path}"
+        else:
+            conn_str = f"sqlite:////{db_path}"
+
         engine = sqlalchemy.create_engine(conn_str)
         self.conn = engine.connect()
 
@@ -44,8 +50,7 @@ def get_luck_scores(year, week):
     df["LuckyWin"] = df[["HomeTeamScore", "AwayTeamScore"]].max(axis=1) <= avg - (stddev / 2)
     df["UnluckyLoss"] = df[["HomeTeamScore", "AwayTeamScore"]].min(axis=1) >= avg + (stddev / 2)
 
-    if df["LuckyWin"].any() or df["UnluckyLoss"].any():
-        print("d")
+    return df
 
 
 if __name__ == "__main__":
