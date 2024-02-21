@@ -1,0 +1,8 @@
+- overall finishes
+- lifetime w/l
+- lifetime points for/against
+- best at starting players? % of points coming from bench/starters
+- best drafter? some kind of function involving points scored and pick #
+- best/worst individual weeks
+- lopsided W/L against others
+- luckiest/unluckiest? some kind of study of record vs. points scored

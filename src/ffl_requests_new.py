@@ -87,6 +87,8 @@ def get_player_scores(year):
         r = get_r_json(r, year)
         for tm in r["teams"]:
             tmid = tm["id"]
+            if tmid == 1:
+                tmid
             for p in tm["roster"]["entries"]:
                 res = {
                     "Week": week,
@@ -168,8 +170,7 @@ def get_final_ranks(year):
     url = get_base_endpoint(year)
     params = {"view": "mScoreboard"}
     r = requests.get(url, params=params, cookies=cookies, verify=False)
-    r.raise_for_status()
-    r = r.json()
+    r = get_r_json(r, year)
     return (
         pd.json_normalize(r, record_path="teams")
         .rename(
@@ -182,13 +183,17 @@ def get_final_ranks(year):
             },
             axis=1,
         )
-        .drop(["abbrev", "divisionId", "location", "logo", "name", "nickname"], axis=1)
+        .drop(
+            ["abbrev", "divisionId", "location", "logo", "name", "nickname"],
+            axis=1,
+            errors="ignore",
+        )
     )
 
 
 def get_members():
     members_dfs = []
-    for year in range(2015, 2023):
+    for year in range(2015, 2024):
         url = get_base_endpoint(year=year)
         r = requests.get(url, cookies=cookies, verify=False)
         r = get_r_json(r, year)
@@ -221,10 +226,11 @@ def get_members():
         members_dfs.append(members_df)
 
     res = pd.concat(members_dfs)
+    res["owners"] = res["owners"].astype(str)
 
-    return res.assign(FullTeamName=res["location"] + " " + res["nickname"]).drop(
-        ["location", "nickname", "owners"], axis=1
-    )
+    return res  # .assign(FullTeamName=res["location"] + " " + res["nickname"]).drop(
+    #     ["location", "nickname", "owners"], axis=1
+    # )
 
 
 def fix_owning_team_id(df):
@@ -266,6 +272,6 @@ def get_draft(year):
 
 
 if __name__ == "__main__":
-    year = 2018
-    bigres = get_members()
+    year = 2015
+    bigres = get_player_scores(year)
     bigres

@@ -49,7 +49,7 @@ def populate_draft_info(year):
 if __name__ == "__main__":
     populate_proteams()
     populate_league_members()
-    for year in range(2018, 2023):
+    for year in range(2015, 2024):
         try:
             populate_matchups(year)
         except Exception as e:
