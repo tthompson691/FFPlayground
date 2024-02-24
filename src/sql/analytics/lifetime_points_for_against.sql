@@ -6,8 +6,8 @@ SELECT
 FROM
 (SELECT
     pf.RealName,
-    pf.score PointsFor,
-    pa.score PointsAgainst
+    pf.PointsFor PointsFor,
+    pa.PointsAgainst PointsAgainst
 FROM vw_pointsfor_by_week pf
 JOIN vw_pointsagainst_by_week pa
     ON pf.Year = pa.Year

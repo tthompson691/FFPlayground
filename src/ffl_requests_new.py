@@ -272,6 +272,6 @@ def get_draft(year):
 
 
 if __name__ == "__main__":
-    year = 2015
+    year = 2020
     bigres = get_player_scores(year)
     bigres
