@@ -57,19 +57,20 @@ def parse_player_stats(player_stats, year, week):
     if year <= 2018:
         player_stats = player_stats[0]
         if player_stats["scoringPeriodId"] != week:
-            return None, None
+            return None, None, player_stats["appliedTotal"]
 
     else:
         # projected/actual points
         for stat in player_stats:
-            if stat["scoringPeriodId"] != week:
-                continue
-            if stat["statSourceId"] == 0:
-                act_score = round(stat["appliedTotal"], 2)
-            elif stat["statSourceId"] == 1:
-                proj_score = round(stat["appliedTotal"], 2)
+            if stat["scoringPeriodId"] == week:
+                if stat["statSourceId"] == 0:
+                    act_score = round(stat["appliedTotal"], 2)
+                elif stat["statSourceId"] == 1:
+                    proj_score = round(stat["appliedTotal"], 2)
+            elif stat["scoringPeriodId"] == 0:
+                year_total_score = stat["appliedTotal"]
 
-    return act_score, proj_score
+    return act_score, proj_score, year_total_score
 
 
 def get_player_scores(year):
@@ -103,7 +104,7 @@ def get_player_scores(year):
                 except KeyError:
                     res["InjuryStatus"] = None
 
-                act_score, proj_score = parse_player_stats(
+                act_score, proj_score, year_total_score = parse_player_stats(
                     p["playerPoolEntry"]["player"]["stats"], year, week
                 )
                 #
@@ -112,6 +113,9 @@ def get_player_scores(year):
 
                 if proj_score:
                     res["ProjectedScore"] = proj_score
+
+                if year_total_score:
+                    res["YearTotalScore"] = year_total_score
 
                 all_res.append(res)
 
@@ -272,6 +276,6 @@ def get_draft(year):
 
 
 if __name__ == "__main__":
-    year = 2020
+    year = 2015
     bigres = get_player_scores(year)
     bigres
