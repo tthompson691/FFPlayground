@@ -11,11 +11,13 @@ from ffl_requests_new import (
 )
 from loguru import logger
 
+def create_db_connection():
+    db_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "FFLPlayground.db"))
+    return sqlite3.connect(db_path)
 
 def insert_as_new_table(df, table_name):
     logger.info(f"Inserting to {table_name}...")
-    db_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "FFLPlayground.db"))
-    con = sqlite3.connect(db_path)
+    con = create_db_connection()
     df.to_sql(name=table_name, con=con, index=False, if_exists="append")
     con.close()
     logger.info("Done")
@@ -47,27 +49,42 @@ def populate_draft_info(year):
 
 
 if __name__ == "__main__":
-    populate_proteams()
-    populate_league_members()
-    for year in range(2015, 2024):
-        try:
-            populate_matchups(year)
-        except Exception as e:
-            logger.warning(e)
+    # populate_proteams()
+    # populate_league_members()
+    # for year in range(2015, 2024):
+    #     try:
+    #         populate_matchups(year)
+    #     except Exception as e:
+    #         logger.warning(e)
+    #
+    #     try:
+    #         populate_draft_info(year)
+    #     except Exception as e:
+    #         logger.warning(e)
+    #
+    #     try:
+    #         populate_player_meta(year)
+    #     except Exception as e:
+    #         logger.warning(e)
+    #
+    #     # TODO: figure out scores in < 2019
+    #     if year >= 2019:
+    #         try:
+    #             populate_player_projections(year)
+    #         except Exception as e:
+    #             logger.warning(e)
 
-        try:
-            populate_draft_info(year)
-        except Exception as e:
-            logger.warning(e)
+    # Create views
+    con = create_db_connection()
+    view_path = os.path.abspath(os.path.join(__file__, "..", "..", "sql", "views"))
+    for view_file in os.listdir(view_path):
+        view_name = view_file.removesuffix(".sql")
+        logger.info(f"Creating view {view_name}")
+        con.execute(f"DROP VIEW IF EXISTS {view_name};")
+        full_path = os.path.join(view_path, view_file)
+        with open(full_path, "r") as f:
+            view_def = f.read()
 
-        try:
-            populate_player_meta(year)
-        except Exception as e:
-            logger.warning(e)
+        con.execute(view_def)
 
-        # TODO: figure out scores in < 2019
-        if year >= 2019:
-            try:
-                populate_player_projections(year)
-            except Exception as e:
-                logger.warning(e)
+    con.close()

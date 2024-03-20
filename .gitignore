@@ -5,4 +5,4 @@ __pycache__/
 .vscode/
 FFLPlayground.db
 __pycache__
-FFLPLayground.egg-info
+.idea/
