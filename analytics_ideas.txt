@@ -6,5 +6,6 @@
 - best/worst individual weeks DONE
 - lopsided W/L against others
 - luckiest/unluckiest? some kind of study of record vs. points scored
-- Points f/a ratio vs. Lifetime W/L ratio? Sort of a luck measure?
+- Points f/a ratio vs. Lifetime W/L ratio? Sort of a luck measure? DONE
 - lifetime projected vs actual DONE
+- Lifetime PvP records (i.e. Harry vs. Travis all-time)

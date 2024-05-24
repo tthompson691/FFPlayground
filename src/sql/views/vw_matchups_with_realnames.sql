@@ -4,7 +4,8 @@ SELECT
     lmw.RealName WinnerName,
     lml.RealName LoserName,
     lmh.RealName HomeName,
-    lma.RealName AwayName
+    lma.RealName AwayName,
+    MAX(lmw.RealName || lml.RealName, lml.RealName || lmw.RealName) MatchupID
 FROM matchups m
 JOIN leaguemembers lmw
     ON m.Year = lmw.Year
