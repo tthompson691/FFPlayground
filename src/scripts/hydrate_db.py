@@ -11,9 +11,20 @@ from ffl_requests_new import (
 )
 from loguru import logger
 
+
 def create_db_connection():
     db_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "FFLPlayground.db"))
     return sqlite3.connect(db_path)
+
+
+def drop_all_tables():
+    con = create_db_connection()
+    for table in ["leaguemembers", "drafts", "matchups", "players", "playerscores", "proteams"]:
+        logger.info(f"Dropping {table}")
+        con.execute(f"DROP TABLE IF EXISTS {table};")
+
+    con.close()
+
 
 def insert_as_new_table(df, table_name):
     logger.info(f"Inserting to {table_name}...")
@@ -49,30 +60,31 @@ def populate_draft_info(year):
 
 
 if __name__ == "__main__":
-    # populate_proteams()
-    # populate_league_members()
-    # for year in range(2015, 2024):
-    #     try:
-    #         populate_matchups(year)
-    #     except Exception as e:
-    #         logger.warning(e)
-    #
-    #     try:
-    #         populate_draft_info(year)
-    #     except Exception as e:
-    #         logger.warning(e)
-    #
-    #     try:
-    #         populate_player_meta(year)
-    #     except Exception as e:
-    #         logger.warning(e)
-    #
-    #     # TODO: figure out scores in < 2019
-    #     if year >= 2019:
-    #         try:
-    #             populate_player_projections(year)
-    #         except Exception as e:
-    #             logger.warning(e)
+    drop_all_tables()
+    populate_proteams()
+    populate_league_members()
+    for year in range(2015, 2024):
+        try:
+            populate_matchups(year)
+        except Exception as e:
+            logger.warning(e)
+
+        try:
+            populate_draft_info(year)
+        except Exception as e:
+            logger.warning(e)
+
+        try:
+            populate_player_meta(year)
+        except Exception as e:
+            logger.warning(e)
+
+        # TODO: figure out scores in < 2019
+        if year >= 2019:
+            try:
+                populate_player_projections(year)
+            except Exception as e:
+                logger.warning(e)
 
     # Create views
     con = create_db_connection()
