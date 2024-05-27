@@ -1,0 +1,11 @@
+- overall finishes DONE
+- lifetime w/l DONE
+- lifetime points for/against DONE
+- best at starting players? % of points coming from bench/starters DONE
+- best drafter? some kind of function involving points scored and pick #
+- best/worst individual weeks DONE
+- lopsided W/L against others
+- luckiest/unluckiest? some kind of study of record vs. points scored DONE
+- Points f/a ratio vs. Lifetime W/L ratio? Sort of a luck measure? DONE
+- lifetime projected vs actual DONE
+- Lifetime PvP records (i.e. Harry vs. Travis all-time) DONE
