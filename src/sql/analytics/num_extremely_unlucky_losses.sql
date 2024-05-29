@@ -1,13 +1,13 @@
 SELECT
 	a.RealName,
-	COUNT(a.RealName) NumUnluckyLosses
+	COUNT(a.RealName) NumExtremelyUnluckyLosses
 FROM
 (SELECT
 "Year",
 "Week",
  RealName
 FROM vw_pointsfor_by_week vpbw
-WHERE PointsForWeeklyRank = 3
+WHERE PointsForWeeklyRank = 2
 GROUP BY Year, Week
 ) a
 JOIN vw_matchups_with_realnames vmwr
@@ -15,4 +15,4 @@ JOIN vw_matchups_with_realnames vmwr
 	AND a.Year = vmwr."Year"
 	AND a.Week = vmwr."Week"
 GROUP BY a.RealName
-ORDER BY NumUnluckyLosses DESC;
+ORDER BY NumExtremelyUnluckyLosses DESC;
