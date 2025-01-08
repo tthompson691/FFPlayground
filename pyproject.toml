@@ -1,46 +1,23 @@
 [project]
-name = "FFLPlayground"
-dynamic = ["version"]
-
+name = "ffplayground"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
 dependencies = [
-  "pandas",
-  "requests",
-  "sqlalchemy",
-  "numpy"
+    "emoji>=2.14.0",
+    "numpy>=2.2.1",
+    "pandas>=2.2.3",
+    "plotly>=5.24.1",
+    "requests>=2.32.3",
+    "sqlalchemy>=2.0.36",
 ]
-
-[project.optional-dependencies]
-dev = [
-  "pre-commit",
-  "pytest",
-  "pytest-cov",
-  "black==22.3.0",
-  "ruff==0.0.263",
-  "loguru"
-]
-
-[tool.black]
-line-length = 100
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
-[tool.isort]
-profile = "black"
-line_length = 100
-src_paths = ["src", "tests"]
 
 [tool.ruff]
-ignore = ["F401"]
 line-length = 100
+
+[[tool.uv.index]]
+name = "artifactory"
+url = "https://artifactory-prd.eprod.com/artifactory/api/pypi/bds-pypi/simple"
+default = true
+secondary = false

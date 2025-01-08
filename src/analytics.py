@@ -7,7 +7,6 @@ import emoji
 from scripts.hydrate_db import create_db_connection
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
-import matplotlib.transforms as mtransforms
 import streamlit as st
 
 SQL_PATH = os.path.abspath(os.path.join(__file__, "..", "sql"))

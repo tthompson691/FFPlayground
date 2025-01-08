@@ -197,7 +197,7 @@ def get_final_ranks(year):
 
 def get_members():
     members_dfs = []
-    for year in range(2015, 2024):
+    for year in range(2015, 2025):
         url = get_base_endpoint(year=year)
         r = requests.get(url, cookies=cookies, verify=False)
         r = get_r_json(r, year)

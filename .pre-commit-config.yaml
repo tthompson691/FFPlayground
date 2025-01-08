@@ -1,26 +1,8 @@
----
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.3
     hooks:
-      - id: black
-        entry: venv\\Scripts\\black.exe
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.261'
-    hooks:
-      - id: ruff
-        entry: venv\\Scripts\\ruff.exe
-        args: [--fix]
-  - repo: https://github.com/jazzband/pip-tools
-    rev: 6.13.0
-    hooks:
-      - id: pip-compile
-        name: pip-compile requirements.txt
-        entry: venv\\Scripts\\pip-compile.exe
-        args: [pyproject.toml]
-        files: pyproject.toml
-      - id: pip-compile
-        name: pip-compile requirements-dev.txt
-        entry: venv\\Scripts\\pip-compile.exe
-        args: ['--extra', 'dev', '-o', 'requirements-dev.txt', 'pyproject.toml']
-        files: pyproject.toml
+    -   id: ruff-format
+        args: [--line-length=100]
+    -   id: ruff
+        args: [--fix, --exit-non-zero-on-fix, --line-length=100]

@@ -1,4 +1,3 @@
-import requests
 import pandas as pd
 import sqlite3
 import os
@@ -63,7 +62,7 @@ if __name__ == "__main__":
     drop_all_tables()
     populate_proteams()
     populate_league_members()
-    for year in range(2015, 2024):
+    for year in range(2015, 2025):
         try:
             populate_matchups(year)
         except Exception as e:
